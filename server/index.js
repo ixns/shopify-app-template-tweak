@@ -29,13 +29,17 @@ Shopify.Context.initialize({
   SESSION_STORAGE: new Shopify.Session.MemorySessionStorage(),
 })
 
+pg_store.storeActiveShop({ shop: 'ixns', scope: 'everything', accessToken: '1234' })
+
 // Storing the currently active shops in memory will force them to re-login when your server restarts. You should
 // persist this object in your app.
-const ACTIVE_SHOPIFY_SHOPS = pg_store.loadActiveShops()
+const ACTIVE_SHOPIFY_SHOPS = await pg_store.loadActiveShops()
+console.log(ACTIVE_SHOPIFY_SHOPS)
 Shopify.Webhooks.Registry.addHandler('APP_UNINSTALLED', {
   path: '/webhooks',
   webhookHandler: async (topic, shop, body) => {
     delete ACTIVE_SHOPIFY_SHOPS[shop]
+    pg_store.deleteActiveShop(shop)
   },
 })
 
